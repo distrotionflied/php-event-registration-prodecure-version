@@ -17,7 +17,7 @@
                 e.event_end,
                 u.name AS creator_name
             FROM events e
-            JOIN users u ON e.user_id = u.id
+            JOIN users u ON e.user_id = u.user_id
             ORDER BY e.event_start DESC";
             $result = $this->connection->query($sql);
             if (!$result) {

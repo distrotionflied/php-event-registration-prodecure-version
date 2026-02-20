@@ -1,61 +1,82 @@
 <?php
-
 declare(strict_types=1);
 
-// กำหนดค่าคงที่สำหรับการอนุญาตวิธีการร้องขอต่างๆ
-// ในที่นี้ เราอนุญาตเฉพาะ GET และ POST
-const ALLOW_METHODS = ['GET', 'POST'];
-const INDEX_URI = '';
-
-// กำหนดค่าคงที่สำหรับ route เริ่มต้น
-const INDEX_ROUNTE = 'home';
-
-
-// ฟังชันสำหรับทำให้ URI ที่ร้องขอเข้ามาอยู่ในรูปแบบมาตรฐาน
 function normalizeUri(string $uri): string
 {
-
-    $uri = strtok($uri,"?");
-
-    // ลบเครื่องหมาย '/' ที่อยู่ข้างหน้าและข้างหลังออก และแปลงเป็นตัวพิมพ์เล็ก
-    $uri = strtolower(trim($uri, '/'));
-
-    // เช็คว่า URI ว่างหรือไม่ ถ้าว่างให้เปลี่ยนเป็น route เริ่มต้น
-    return $uri == INDEX_URI ? INDEX_ROUNTE : $uri;
+    $uri = preg_replace('/\?.*/', '', $uri);
+    return strtolower(trim($uri, '/'));
 }
 
-// ฟังชันสำหรับแสดงหน้า 404 Not Found
-function notFound()
+function notFound(): void
 {
     http_response_code(404);
-    // เรียกใช้ฟังก์ชัน renderView เพื่อแสดงหน้า 404
     renderView('404');
     exit;
 }
 
-// ฟังชันสำหรับการหาเส้นทางไฟล์ PHP ที่ตรงกับ URI ที่ร้องขอเข้ามา
-function getFilePath(string $uri): string
+function getRouteHandler(string $uri, string $method): ?array
 {
-    return ROUTE_DIR . '/' . normalizeUri($uri) . '.php';
+    $method = strtoupper($method);
+
+    // GET /
+    if ($uri === '' && $method === 'GET') {
+        return ['EventController', 'index'];
+    }
+
+    // GET /events
+    if ($uri === 'events' && $method === 'GET') {
+        return ['EventController', 'index'];
+    }
+
+    // GET /events/create
+    if ($uri === 'events/create' && $method === 'GET') {
+        return ['EventController', 'goToCreate'];
+    }
+
+    // POST /events
+    if ($uri === 'events' && $method === 'POST') {
+        return ['EventController', 'create'];
+    }
+
+    // GET /events/{id}
+    if (preg_match('/^events\/(\d+)$/', $uri, $matches) && $method === 'GET') {
+        return ['EventController', 'show', (int)$matches[1]];
+    }
+
+    // POST /events/{id}/edit
+    if (preg_match('/^events\/(\d+)\/edit$/', $uri, $matches) && $method === 'POST') {
+        return ['EventController', 'edit', (int)$matches[1]];
+    }
+
+    return null;
 }
 
-// ฟังก์ชันหลักสำหรับการจัดการเส้นทาง (routing) ที่ถูกเรียกใช้จาก index.php
 function dispatch(string $uri, string $method): void
 {
-    // ฟังชันสำหรับทำให้ URI ที่ร้องขอเข้ามาอยู่ในรูปแบบมาตรฐาน
     $uri = normalizeUri($uri);
 
-    // ตรวจสอบว่าวิธีการร้องขอ (HTTP Method) ถูกอนุญาตหรือไม่
     if (!in_array(strtoupper($method), ALLOW_METHODS)) {
         notFound();
     }
 
-    // ฟังชันสำหรับการหาเส้นทางไฟล์ PHP ที่ตรงกับ URI ที่ร้องขอเข้ามา
-    $filePath = getFilePath($uri);
-    if (file_exists($filePath)) {
-        include($filePath);
-        return;
-    } else {
+    $handler = getRouteHandler($uri, $method);
+
+    if (!$handler) {
         notFound();
+    }
+
+    [$controllerName, $action, $param] = array_pad($handler, 3, null);
+
+    require_once ROUTE_DIR . "/{$controllerName}.php";
+
+    // ใช้ global ชั่วคราว (เดี๋ยวค่อยทำ container)
+    global $eventRepo;
+
+    $controller = new $controllerName($eventRepo);
+
+    if ($param !== null) {
+        $controller->$action($param);
+    } else {
+        $controller->$action();
     }
 }
