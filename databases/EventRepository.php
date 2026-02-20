@@ -185,4 +185,38 @@
             return $stmt->affected_rows > 0;
         }
 
+        public function getEventsByCreatorId(int $creatorId): array
+        {
+            $sql = "SELECT e.event_id AS id,
+                    e.event_name AS name,
+                    e.event_description AS description,
+                    e.event_start,
+                    e.event_end,
+                    u.name AS creator_name
+            FROM events e
+            JOIN users u ON e.user_id = u.user_id
+            WHERE e.user_id = ?
+            ORDER BY e.event_start DESC";
+            $stmt = $this->connection->prepare($sql);
+            $stmt->bind_param("i", $creatorId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if (!$result) {
+                throw new Exception($this->connection->error);
+            }
+            $events = [];
+
+            while ($row = $result->fetch_assoc()) {
+                $events[] = new EventDTO(
+                    $row['id'],
+                    $row['name'],
+                    $row['description'],
+                    $row['event_start'],
+                    $row['event_end'],
+                    $row['creator_name']
+                );
+            }
+
+            return $events;
+        }
     }

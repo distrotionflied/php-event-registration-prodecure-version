@@ -21,7 +21,7 @@
             renderView('users', ['title' => 'Users', 'users' => $users]);
         }
 
-        public function profile(): void
+        public function showProfile(): void
         {
             requireAuth();
             $userId = $_SESSION['user_id'];
@@ -47,7 +47,6 @@
 
                 // เก็บข้อมูลที่จำเป็นลง Session (แยกชื่อให้ชัดเจน)
                 $_SESSION['user_id'] = $user['user_id'];           // ID หลักสำหรับ Query DB
-                $_SESSION['student_id'] = $user['student_id']; // ID นักศึกษาสำหรับแสดงผล
                 $_SESSION['username'] = $user['name'];
                 $_SESSION['timestamp'] = time();
 

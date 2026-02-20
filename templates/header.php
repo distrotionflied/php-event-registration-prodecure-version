@@ -10,7 +10,7 @@
         <div><a href="/events">Explore</a></div>
         <div><a href="/my-register">My Register</a></div>
         <div><a href="/my-events">My Events</a></div>
-        <div><a href="/profile">ข้อมูลวิชา</a></div>
+        <div><a href="/profile">Profile</a></div>
         <div><a href="/logout">ออกจากระบบ</a></div>
     <?php endif; ?>
 </nav>

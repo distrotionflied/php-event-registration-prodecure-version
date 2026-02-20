@@ -41,8 +41,16 @@ function getRouteHandler(string $uri, string $method): ?array
     if ($method === 'GET' && $uri === 'logout') {
         return ['UserController', 'logout'];
     }
+
     if ($method === 'GET' && $uri === 'register') {
         return ['UserController', 'showRegister'];
+    }
+    if ($method === 'POST' && $uri === 'register') {
+        return ['UserController', 'doRegister'];
+    }
+
+    if ($method === 'GET' && $uri === 'profile') {
+        return ['UserController', 'showProfile'];
     }
 
     // EVENTS
@@ -64,6 +72,15 @@ function getRouteHandler(string $uri, string $method): ?array
 
     if ($method === 'GET' && preg_match('/^events\/(\d+)\/edit$/', $uri, $m)) {
         return ['EventController', 'showEdit', (int)$m[1]];
+    }
+
+    if ($method === 'GET' && $uri === 'my-events') {
+        return ['EventController', 'showMyEvents'];
+    }
+
+    // REGISTRATION
+    if ($method === 'POST' && preg_match('/^events\/(\d+)\/register$/', $uri, $m)) {
+        return ['EventController', 'register', (int)$m[1]];
     }
 
     return null;

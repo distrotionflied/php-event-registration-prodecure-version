@@ -49,11 +49,21 @@ class UserRepository
     }
 
     public function getUserProfileDetails($userId) {
-        $sql = "SELECT name, email, birthday, phone, gender FROM users WHERE id = ?";
+        $sql = "SELECT name, email, birthday, phone, gender FROM users WHERE user_id = ?";
         $stmt = $this->connection->prepare($sql);
         $stmt->bind_param("i", $userId);
         $stmt->execute();
-        return $stmt->get_result()->fetch_assoc();
+        $row = $stmt->get_result()->fetch_assoc();
+        if ($row) {
+            return new UserprofileDTO(
+                $row['name'],
+                $row['email'],
+                $row['birthday'],
+                $row['phone'],
+                Gender::fromValue($row['gender'])
+            );
+        }
+        return null;
     }
 
     public function getUsernameById($userId) {

@@ -74,4 +74,11 @@
             // เปลี่ยนเส้นทางกลับไปที่หน้าแสดงรายละเอียด event
             header('Location: /events/' . $id);
         }
+
+        public function showMyEvents(): void
+        {
+            $userId = $_SESSION['user_id'];
+            $events = $this->eventRepo->getEventsByCreatorId($userId);
+            renderView('my-events', ['title' => 'My Events', 'events' => $events]);
+        }
     }
