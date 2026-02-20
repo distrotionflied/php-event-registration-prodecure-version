@@ -48,7 +48,7 @@
                    e.event_end,
                    u.name AS creator_name
             FROM events e
-            JOIN users u ON e.user_id = u.id
+            JOIN users u ON e.user_id = u.user_id
             WHERE e.event_id = ?";
             $stmt = $this->connection->prepare($sql);
             $stmt->bind_param("i", $eventId);

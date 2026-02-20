@@ -11,7 +11,7 @@
         <?php foreach ($events as $event) : ?>
             <li style="margin-bottom:10px;">
                 <strong>
-                    <a href="/events/<?= $event->event_id ?>">
+                    <a href="/events/<?= $event->id ?>">
                         <?= htmlspecialchars($event->name) ?>
                     </a>
                 </strong>

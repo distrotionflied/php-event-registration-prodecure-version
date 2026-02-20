@@ -34,16 +34,16 @@ $eventController = new EventController($eventRepo);
 //dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
 
 // ควบคุมการเข้าถึงหน้าเว็บด้วย session (ตัวอย่างการใช้งาน)
-const PUBLIC_ROUTES = ['/', '/login'];
+const PUBLIC_ROUTES = ['/', '/login', '/events'];
 
-if (in_array(strtolower($_SERVER['REQUEST_URI']), PUBLIC_ROUTES)) {
+
+$uri = normalizeUri($_SERVER['REQUEST_URI']);
+
+if (
+    $uri === '' ||
+    str_starts_with($uri, 'events') ||
+    $uri === 'login'
+) {
     dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
     exit;
-} elseif (isset($_SESSION['timestamp']) && time() - $_SESSION['timestamp'] < 90) {
-    // 10 Sec.
-    $unix_timestamp = time();
-    $_SESSION['timestamp'] = $unix_timestamp;
-    dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
-} else {
-    logout();
 }
