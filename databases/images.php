@@ -1,31 +1,24 @@
 <?php
-class ImageRepository
-{
-    private $connection;
-
-    public function __construct($connection)
+    function saveImage($eventId, $imagePath)
     {
-        $this->connection = $connection;
-    }
-
-    public function saveImage($eventId, $imagePath)
-    {
+        global $connection;
         $sql = "INSERT INTO images (event_id, image_path) VALUES (?, ?)";
-        $stmt = $this->connection->prepare($sql);
+        $stmt = $connection->prepare($sql);
         if (!$stmt) {
-            throw new Exception($this->connection->error);
+            throw new Exception($connection->error);
         }
         $stmt->bind_param("is", $eventId, $imagePath);
 
         return $stmt->execute();
     }
 
-    public function getImagesByEventId($eventId)
+    function getImagesByEventId($eventId)
     {
+        global $connection;
         $sql = "SELECT image_path FROM images WHERE event_id = ?";
-        $stmt = $this->connection->prepare($sql);
+        $stmt = $connection->prepare($sql);
         if (!$stmt) {
-            throw new Exception($this->connection->error);
+            throw new Exception($connection->error);
         }
         $stmt->bind_param("i", $eventId);
         $stmt->execute();
@@ -39,15 +32,16 @@ class ImageRepository
         return $images;
     }
 
-    public function deleteImagesByEventId($eventId)
+    function deleteImagesByEventId($eventId)
     {
+        global $connection;
         $sql = "DELETE FROM images WHERE event_id = ?";
-        $stmt = $this->connection->prepare($sql);
+        $stmt = $connection->prepare($sql);
         if (!$stmt) {
-            throw new Exception($this->connection->error);
+            throw new Exception($connection->error);
         }
         $stmt->bind_param("i", $eventId);
 
         return $stmt->execute();
     }
-}
+

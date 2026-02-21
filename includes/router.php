@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 
+/*
+|--------------------------------------------------------------------------
+| NORMALIZER
+|--------------------------------------------------------------------------
+*/
 function normalizeUri(string $uri): string
 {
     $uri = parse_url($uri, PHP_URL_PATH);
@@ -16,71 +21,45 @@ function notFound(): void
 
 /*
 |--------------------------------------------------------------------------
-| ROUTE MATCHER
+| DYNAMIC ROUTE RESOLVER
+|
+| URI Pattern → { scope, action, id }
+|
+|  /                        → scope=events,  action=index,    id=null
+|  /events                   → scope=events,  action=index,    id=null
+|  /events/create            → scope=events,  action=create,   id=null
+|  /events/6/detail          → scope=events,  action=detail,   id=6
+|  /events/6/edit            → scope=events,  action=edit,     id=6
+|  /events/6/register        → scope=events,  action=register, id=6
+|  /users/login              → scope=users,   action=login,    id=null
+|  /users/profile            → scope=users,   action=profile,  id=null
 |--------------------------------------------------------------------------
 */
-
-function getRouteHandler(string $uri, string $method): ?array
+function resolveRoute(string $uri): ?array
 {
-    $method = strtoupper($method);
-
-    // GET /
-    if ($method === 'GET' && $uri === '') {
-        return ['EventController', 'index'];
+    // Root → default
+    if ($uri === '') {
+        return ['scope' => 'events', 'action' => 'index', 'id' => null];
     }
 
-    // USER AUTH
-    if ($method === 'GET' && $uri === 'login') {
-        return ['UserController', 'showLogin'];
+    $segments = explode('/', $uri);
+    $count    = count($segments);
+
+    $scope = $segments[0]; // เช่น events, users
+
+    // /scope  → index
+    if ($count === 1) {
+        return ['scope' => $scope, 'action' => 'index', 'id' => null];
     }
 
-    if ($method === 'POST' && $uri === 'login') {
-        return ['UserController', 'doLogin'];
+    // /scope/{action}  เช่น events/create, users/login
+    if ($count === 2 && !is_numeric($segments[1])) {
+        return ['scope' => $scope, 'action' => $segments[1], 'id' => null];
     }
 
-    if ($method === 'GET' && $uri === 'logout') {
-        return ['UserController', 'logout'];
-    }
-
-    if ($method === 'GET' && $uri === 'register') {
-        return ['UserController', 'showRegister'];
-    }
-    if ($method === 'POST' && $uri === 'register') {
-        return ['UserController', 'doRegister'];
-    }
-
-    if ($method === 'GET' && $uri === 'profile') {
-        return ['UserController', 'showProfile'];
-    }
-
-    // EVENTS
-    if ($method === 'GET' && $uri === 'events') {
-        return ['EventController', 'index'];
-    }
-
-    if ($method === 'GET' && $uri === 'events/create') {
-        return ['EventController', 'goToCreate'];
-    }
-
-    if ($method === 'POST' && $uri === 'events') {
-        return ['EventController', 'create'];
-    }
-
-    if ($method === 'GET' && preg_match('/^events\/(\d+)$/', $uri, $m)) {
-        return ['EventController', 'show', (int)$m[1]];
-    }
-
-    if ($method === 'GET' && preg_match('/^events\/(\d+)\/edit$/', $uri, $m)) {
-        return ['EventController', 'showEdit', (int)$m[1]];
-    }
-
-    if ($method === 'GET' && $uri === 'my-events') {
-        return ['EventController', 'showMyEvents'];
-    }
-
-    // REGISTRATION
-    if ($method === 'POST' && preg_match('/^events\/(\d+)\/register$/', $uri, $m)) {
-        return ['EventController', 'register', (int)$m[1]];
+    // /scope/{id}/{action}  เช่น events/6/edit, events/6/detail
+    if ($count === 3 && is_numeric($segments[1])) {
+        return ['scope' => $scope, 'action' => $segments[2], 'id' => (int)$segments[1]];
     }
 
     return null;
@@ -88,13 +67,12 @@ function getRouteHandler(string $uri, string $method): ?array
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC ROUTE CHECK
+| AUTH CHECK
 |--------------------------------------------------------------------------
 */
-
 function isPublicRoute(string $uri): bool
 {
-    return in_array($uri, PUBLIC_ROUTES);
+    return in_array($uri, PUBLIC_ROUTES, true);
 }
 
 /*
@@ -102,76 +80,45 @@ function isPublicRoute(string $uri): bool
 | DISPATCHER
 |--------------------------------------------------------------------------
 */
-
 function dispatch(string $uri, string $method): void
 {
-    //ลบ ออก ถ้าทำเสร็จแล้ว
-    var_dump($_SESSION);
-    $uri = normalizeUri($uri);
+    $uri    = normalizeUri($uri);
+    $method = strtoupper($method);
 
-    if (!in_array(strtoupper($method), ALLOW_METHODS)) {
-        notFound();
-    }
-
-    $handler = getRouteHandler($uri, $method);
-
-    if (!$handler) {
+    if (!in_array($method, ALLOW_METHODS, true)) {
         notFound();
     }
 
     // 🔐 Auth Check
     if (!isPublicRoute($uri) && !isset($_SESSION['user_id'])) {
-        header('Location: /login');
+        header('Location: /users/login');
         exit;
     }
 
-    [$controllerName, $action, $param] = array_pad($handler, 3, null);
+    $route = resolveRoute($uri);
 
-    require_once ROUTE_DIR . "/{$controllerName}.php";
+    if (!$route) {
+        notFound();
+    }
 
-    global $eventRepo, $userRepo;
+    ['scope' => $scope, 'action' => $action, 'id' => $id] = $route;
 
-    $controller = match ($controllerName) {
-        'EventController' => new EventController($eventRepo),
-        'UserController'  => new UserController($userRepo),
-        default => notFound(),
-    };
+    // โหลดไฟล์ controllers/{scope}/{action}.php
+    $file = ROUTE_DIR . "/{$scope}/{$action}.php";
 
-    $param !== null
-        ? $controller->$action($param)
-        : $controller->$action();
+    if (!file_exists($file)) {
+        notFound();
+    }
+
+    // ส่ง context เข้าไปให้ไฟล์ action ใช้งานได้เลย
+    $context = [
+        'method' => $method,
+        'id'     => $id,
+        'scope'  => $scope,
+        'action' => $action,
+    ];
+
+    var_dump($context); // Debug: ดู context ที่ส่งไป
+
+    require $file; // ไฟล์รับ $context แล้วทำงานได้เลย
 }
-
-/*
-|--------------------------------------------------------------------------
-| EXPLANATION
-|--------------------------------------------------------------------------
-| 
-อธิบายการทำงานของระบบ Router
-
-โค้ดชุดนี้ทำหน้าที่เป็น Centralized Router ที่ควบคุมการเข้าถึงหน้าเว็บทั้งหมดผ่าน 3 ขั้นตอนหลัก เริ่มจาก การเตรียม URI โดยฟังก์ชัน normalizeUri จะทำความสะอาดที่อยู่ URL ที่ผู้ใช้พิมพ์เข้ามาให้เหลือเพียงชื่อ Path สะอาดๆ เช่น /Events/Create/ จะถูกเปลี่ยนเป็น events/create เพื่อให้ง่ายต่อการตรวจสอบ จากนั้นจะเข้าสู่กระบวนการ Route Matching ในฟังก์ชัน getRouteHandler ซึ่งเปรียบเสมือนแผนที่นำทาง โดยจะเช็คว่า HTTP Method (GET/POST) และ URI นั้นตรงกับเงื่อนไขที่ตั้งไว้หรือไม่ หากมีการใช้ตัวเลข ID ใน URL เช่น events/1 ระบบจะใช้ preg_match (Regular Expression) เพื่อดึงเลข ID นั้นออกมาเป็นตัวแปรส่งต่อไปยัง Controller
-
-ส่วนสุดท้ายคือ Dispatcher ซึ่งเป็นหัวใจในการตัดสินใจก่อนแสดงผล ระบบจะเช็คสิทธิ์การเข้าถึง (Auth Check) โดยดูว่าเส้นทางนั้นอยู่ใน PUBLIC_ROUTES หรือไม่ หากไม่ใช่และผู้ใช้ยังไม่ได้ Login ระบบจะบังคับกระโดดไปหน้า /login ทันที แต่ถ้าทุกอย่างถูกต้อง ระบบจะทำการสร้าง Object ของ Controller ที่เกี่ยวข้อง (เช่น EventController หรือ UserController) พร้อมส่ง Repository เข้าไปใน Constructor และเรียกใช้ Method (Action) ที่ต้องการพร้อมส่งค่าพารามิเตอร์ (ถ้ามี) เพื่อไปประมวลผลต่อและแสดงหน้า Template ให้ผู้ใช้เห็นครับ
-วิธีเพิ่มเส้นทาง (Route) และหน้าใหม่ (Template)
-
-หากคุณต้องการเพิ่มหน้าใหม่ เช่นหน้า "แก้ไขโปรไฟล์" (GET /profile/edit) ให้ทำตามลำดับขั้นตอนดังนี้ครับ:
-
-    เพิ่มเงื่อนไขใน getRouteHandler: เข้าไปที่ฟังก์ชันนี้แล้วเพิ่มเงื่อนไข if ตรวจสอบ Method และ URI ที่ต้องการ พร้อมระบุชื่อ Controller และชื่อฟังก์ชันที่จะใช้รับงาน เช่น:
-    PHP
-
-    if ($method === 'GET' && $uri === 'profile/edit') {
-        return ['UserController', 'showEditProfile'];
-    }
-
-    เพิ่มฟังก์ชันใน Controller: ไปที่ไฟล์ UserController.php แล้วสร้าง Method ชื่อ showEditProfile() เพื่อเตรียมข้อมูลและสั่ง Render:
-    PHP
-
-    public function showEditProfile() {
-        // ดึงข้อมูล User จาก $this->userRepo
-        renderView('edit_profile_template', ['user' => $data]);
-    }
-
-    สร้างไฟล์ Template: สร้างไฟล์ HTML/PHP ใหม่ในโฟลเดอร์ที่เก็บ View (ตามชื่อที่ตั้งไว้ในข้อ 2 เช่น edit_profile_template.php) เพื่อเขียนโครงสร้างหน้าเว็บที่คุณต้องการแสดงผล
-
-    ตั้งค่าความเป็นส่วนตัว (Optional): หากหน้านี้ต้องล็อกอินก่อนถึงจะเข้าได้ คุณไม่ต้องทำอะไรเพิ่มเพราะระบบจะกันไว้อัตโนมัติ แต่ถ้าต้องการให้ทุกคนเข้าถึงได้โดยไม่ต้องล็อกอิน ให้เอาคำว่า 'profile/edit' ไปเพิ่มไว้ในค่าคงที่ PUBLIC_ROUTES ในไฟล์ Config ของคุณครับ
-*/

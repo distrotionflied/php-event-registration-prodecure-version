@@ -1,30 +1,24 @@
 <?php
-
 declare(strict_types=1);
 session_start();
-
-const INCLUDES_DIR = __DIR__ . '/../includes';
-const ROUTE_DIR = __DIR__ . '/../routes';
-const TEMPLATES_DIR = __DIR__ . '/../templates';
-const DATABASES_DIR = __DIR__ . '/../databases';
-const DTO_DIR = __DIR__ . '/../DTOs';
+const INCLUDES_DIR   = __DIR__ . '/../includes';
+const ROUTE_DIR      = __DIR__ . '/../routes';
+//const CONTROLLER_DIR = __DIR__ . '/../controllers';  // เพิ่ม
+const TEMPLATES_DIR  = __DIR__ . '/../templates';
+const DATABASES_DIR  = __DIR__ . '/../databases';
 
 require_once DATABASES_DIR . '/database.php';
-
-require_once INCLUDES_DIR . '/router.php';
-require_once INCLUDES_DIR . '/view.php';
-require_once INCLUDES_DIR . '/helper.php';
-require_once INCLUDES_DIR . '/bootstrap.php';
+require_once INCLUDES_DIR  . '/router.php';
+require_once INCLUDES_DIR  . '/view.php';
+require_once INCLUDES_DIR  . '/helper.php';
+require_once INCLUDES_DIR  . '/bootstrap.php';
+require_once INCLUDES_DIR  . '/Enum.php';
 
 $connection = db_connect();
 
-$userRepo = new UserRepository($connection);
-$eventRepo = new EventRepository($connection);
+// ลบ require controller ออกทั้งหมด router จัดการเอง
 
-require_once ROUTE_DIR . '/EventController.php';
-require_once ROUTE_DIR . '/UserController.php';
-
-const PUBLIC_ROUTES = ['', 'login','events','register'];
-const ALLOW_METHODS = ['GET', 'POST'];
+const PUBLIC_ROUTES  = ['', 'users/login', 'users/register', 'events'];
+const ALLOW_METHODS  = ['GET', 'POST'];
 
 dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

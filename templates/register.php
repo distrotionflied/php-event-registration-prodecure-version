@@ -1,5 +1,5 @@
 <h1><?= htmlspecialchars($data['title']) ?></h1>
-<form action="/register" method="POST">
+<form action="/users/register" method="POST">
     <div>
         <label for="text">ชื่อผู้ใช้</label><br>
         <input type="text" name="first_name" id="first_name" required /><br>
@@ -10,7 +10,7 @@
     </div>
     <div>
         <label for="text">วันเกิด</label><br>
-        <input type="date" name="birth_date" id="birth_date" required /><br>
+        <input type="date" name="birthday" id="birthday" required /><br>
     </div>
     <div>
         <label for="text">เบอร์โทรศัพท์</label><br>
@@ -20,9 +20,9 @@
         <label for="text">เพศ</label><br>   
         <select name="gender" id="gender" required>
             <option value="">เลือกเพศ</option>
-            <option value=<?= Gender::MALE->value ?>>ชาย</option>
-            <option value=<?= Gender::FEMALE->value ?>>หญิง</option>
-            <option value=<?= Gender::OTHER->value ?>>อื่นๆ</option>  
+            <option value="<?= Gender::MALE->value ?>">ชาย</option>
+            <option value="<?= Gender::FEMALE->value ?>">หญิง</option>
+            <option value="<?= Gender::OTHER->value ?>">อื่นๆ</option>  
         </select><br>
     </div>
     <div>
@@ -39,5 +39,8 @@
         <span>หากมีบัญชีผู้ใช้แล้ว <a href="/login">เข้าสู่ระบบ</a></span>
     </div>
     <div>
-        <span><?= $_SESSION['error'] ?? '' ?></span>
+        <?php if (isset($_SESSION['error'])) : ?>
+            <span style="color: red;"><?= $_SESSION['error'] ?></span>
+            <?php unset($_SESSION['error']); // ล้างข้อความผิดพลาดหลังแสดงผล ?>
+        <?php endif; ?>
     </div>

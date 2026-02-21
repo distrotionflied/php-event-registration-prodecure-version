@@ -11,17 +11,17 @@
         <?php foreach ($events as $event) : ?>
             <li style="margin-bottom:10px;">
                 <strong>
-                    <a href="/events/<?= $event->id ?>">
-                        <?= htmlspecialchars($event->name) ?>
+                    <a href="/events/<?= $event['id'] ?>">
+                        <?= htmlspecialchars($event['name']) ?>
                     </a>
                 </strong>
                 <br>
                 <small>
-                    <?= htmlspecialchars($event->event_start) ?> 
+                    <?= htmlspecialchars($event['event_start']) ?> 
                     - 
-                    <?= htmlspecialchars($event->event_end) ?>
+                    <?= htmlspecialchars($event['event_end']) ?>
                     <div>
-                        Created by: <?= htmlspecialchars($event->creator_name) ?>
+                        Created by: <?= htmlspecialchars($event['creator_name']) ?>
                     </div>
                 </small>
                 
