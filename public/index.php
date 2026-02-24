@@ -10,7 +10,8 @@ const DATABASES_DIR  = __DIR__ . '/../databases';
 require_once DATABASES_DIR . '/database.php';
 require_once INCLUDES_DIR  . '/router.php';
 require_once INCLUDES_DIR  . '/view.php';
-require_once INCLUDES_DIR  . '/helper.php';
+require_once INCLUDES_DIR  . '/helper/helper.php';
+require_once INCLUDES_DIR  . '/helper/otp-helper.php';
 require_once INCLUDES_DIR  . '/bootstrap.php';
 require_once INCLUDES_DIR  . '/Enum.php';
 

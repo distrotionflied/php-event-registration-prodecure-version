@@ -69,10 +69,19 @@
                         </div>
 
                         <div class="mt-6">
-                            <a href="/join_event/<?= $event['id'] ?>/join"
-                                class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors no-underline">
-                                🤝 Join Event
-                            </a>
+                            <?php
+                            // เช็กว่ามี array $joined_events และ event id นี้อยู่ใน array นั้นหรือไม่
+                            if (isset($joined_events) && in_array($event['id'], $joined_events)) :
+                            ?>
+                                <span class="block text-center bg-gray-400 text-white font-bold py-2.5 rounded-lg shadow-sm cursor-not-allowed select-none">
+                                    ✅ Joined
+                                </span>
+                            <?php else : ?>
+                                <a href="/join_event/<?= $event['id'] ?>/join"
+                                    class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors no-underline">
+                                    🤝 Join Event
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </li>

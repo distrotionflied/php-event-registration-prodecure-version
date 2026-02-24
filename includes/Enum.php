@@ -16,7 +16,7 @@
 
     enum JoinStatus: string {
         case PENDING = 'pending';
-        case CONFIRMED = 'approved';
-        case CANCELLED = 'rejected';
+        case APPROVED = 'approved';
+        case REJECTED = 'rejected';
     }
 

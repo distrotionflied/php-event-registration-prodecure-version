@@ -12,9 +12,6 @@
                      class="w-full h-auto max-h-[400px] object-cover">
             </div>
         <?php endif; ?>
-
-        <span class="text-xs text-gray-400 block mb-2"><?php echo TEMPLATES_DIR; ?></span>
-
         <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6"><?= htmlspecialchars($event['name']) ?></h1>
 
         <p class="text-gray-700 leading-relaxed mb-8 bg-gray-50 p-6 rounded-lg border border-gray-100 text-base sm:text-lg">
@@ -42,7 +39,11 @@
                     class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">🗑 Delete</a>
 
             <?php endif; ?>
-
+            <?php if (!$joined) : ?>
+            <a href="/events/<?= $event['id'] ?>/join" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">➕ Join Event</a>
+            <?php elseif ($JoinStatus === JoinStatus::APPROVED->value ): ?>
+                <a href="/events/<?= $event['id'] ?>/generate-otp" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">🔐 Generate OTP to check in</a>
+            <?php endif; ?>
             <a href="/events" class="inline-block bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-lg border border-gray-300 shadow-sm transition-colors no-underline mb-3">⬅ Back to Events</a>
         </div>
 
