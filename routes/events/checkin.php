@@ -6,10 +6,7 @@ declare(strict_types=1);
 $joinEventId = (int)($context['id'] ?? 0); // ดึง id จาก router มาใช้เป็น join_event_id
 $method = $context['method']; // 'GET' หรือ 'POST'
 
-if (empty($_SESSION['user_id'])) {
-    header('Location: /login');
-    exit;
-}
+creatorcheck(getJoinEventById($joinEventId)['event_creator_id'], '/events');
 
 if ($method === 'GET') {
     // สมมติว่ามีฟังก์ชัน getJoinEventById สำหรับดึงข้อมูลการเข้าร่วม

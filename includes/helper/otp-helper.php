@@ -1,5 +1,7 @@
 <?php
 
+$OTP_DURATION = 60; // 60 seconds
+
 function generateSecret($length = 16)
 {
     $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -47,9 +49,9 @@ function base32Decode($secret)
 
 function getTOTP($secret, $timeSlice = null)
 {
-
+    global $OTP_DURATION;
     if ($timeSlice === null) {
-        $timeSlice = floor(time() / 30);
+        $timeSlice = floor(time() / $OTP_DURATION);
     }
 
     $secretKey = base32Decode($secret);
@@ -71,9 +73,10 @@ function getTOTP($secret, $timeSlice = null)
 
 function verifyTOTP($secret, $inputOTP, $discrepancy = 1)
 {
+    global $OTP_DURATION;
     if (empty($secret) || !is_string($inputOTP)) return false;
 
-    $currentTimeSlice = floor(time() / 30);
+    $currentTimeSlice = floor(time() / $OTP_DURATION);
 
     for ($i = -$discrepancy; $i <= $discrepancy; $i++) {
         $calculated = getTOTP($secret, $currentTimeSlice + $i);
@@ -87,9 +90,10 @@ function verifyTOTP($secret, $inputOTP, $discrepancy = 1)
 
 function verifyTOTPAtTime($secret, $inputOTP, $time, $discrepancy = 1)
 {
+    global $OTP_DURATION;
     if (empty($secret) || !is_string($inputOTP)) return false;
 
-    $timeSlice = floor($time / 30);
+    $timeSlice = floor($time / $OTP_DURATION);
 
     for ($i = -$discrepancy; $i <= $discrepancy; $i++) {
         $calculated = getTOTP($secret, $timeSlice + $i);

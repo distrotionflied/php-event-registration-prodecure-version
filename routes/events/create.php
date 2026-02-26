@@ -14,14 +14,22 @@ if ($method === 'GET') {
     $event_end   = $_POST['event_end']   ?? '';
     $creator_id  = $_SESSION['user_id'];
 
+    if(empty($name) || empty($description) || empty($event_start) || empty($event_end)) {
+        echo '<script>alert("กรุณากรอกข้อมูลให้ครบถ้วน"); window.location.href = "/events/create";</script>';
+        exit;
+    }
+    
+    if ($event_start > $event_end) {
+        echo '<script>alert("วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด"); window.location.href = "/events/create";</script>';
+        exit;
+    }
+
     // 1. สร้าง Event ในฐานข้อมูลก่อน
     $eventId = createEvent($name, $description, $event_start, $event_end, $creator_id);
 
     if ($eventId) {
         // 2. ตรวจสอบว่ามีการอัปโหลดรูปภาพมาไหม
         if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] === UPLOAD_ERR_OK) {
-            
-            $imgBB_API_KEY = 'af9e4b188017d139fe28d35af8152794'; 
             
             $ext = strtolower(pathinfo($_FILES['event_image']['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg', 'jpeg', 'png', 'webp'];

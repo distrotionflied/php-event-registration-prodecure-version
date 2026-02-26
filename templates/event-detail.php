@@ -11,7 +11,8 @@
                      alt="<?= htmlspecialchars($event['name']) ?>" 
                      class="w-full h-auto max-h-[400px] object-cover">
             </div>
-        <?php endif; ?>
+        <?php endif; ?> 
+
         <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6"><?= htmlspecialchars($event['name']) ?></h1>
 
         <p class="text-gray-700 leading-relaxed mb-8 bg-gray-50 p-6 rounded-lg border border-gray-100 text-base sm:text-lg">
@@ -26,24 +27,23 @@
         <hr class="border-t border-gray-200 my-8">
 
         <div class="flex flex-wrap items-center">
-            <?php if (!empty($_SESSION['user_id']) && $_SESSION['user_id'] == $event['creator_id']): ?>
+            <?php 
+            if ($userId != NULL && $event != NULL) :
+                // 1. เช็คว่าเป็นเจ้าของไหม
+                $isCreator = ($userId == $event['creator_id']);
+                    if ($isCreator): ?>
+                        <a href="/events/<?= $event['id'] ?>/edit" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">✏ Edit</a>
 
-                <a href="/events/<?= $event['id'] ?>/edit" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">✏ Edit</a>
+                        <a href="/events/<?= $event['id'] ?>/participants" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">👥 Participants</a>
 
-                <a href="/events/<?= $event['id'] ?>/participants" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">👥 Participants</a>
+                        <a href="/events/<?= $event['id'] ?>/statistics" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">📊 Statistics</a>
 
-                <a href="/events/<?= $event['id'] ?>/statistics" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">📊 Statistics</a>
-
-                <a href="/events/<?= $event['id'] ?>/delete-event"
-                    onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบกิจกรรมนี้? การกระทำนี้ไม่สามารถย้อนกลับได้');"
-                    class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">🗑 Delete</a>
-
+                        <a href="/events/<?= $event['id'] ?>/delete-event"
+                            onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบกิจกรรมนี้? การกระทำนี้ไม่สามารถย้อนกลับได้');"
+                            class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">🗑 Delete</a>
+                        <?php endif; ?>
             <?php endif; ?>
-            <?php if (!$joined) : ?>
-            <a href="/events/<?= $event['id'] ?>/join" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">➕ Join Event</a>
-            <?php elseif ($JoinStatus === JoinStatus::APPROVED->value ): ?>
-                <a href="/events/<?= $event['id'] ?>/generate-otp" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">🔐 Generate OTP to check in</a>
-            <?php endif; ?>
+
             <a href="/events" class="inline-block bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-lg border border-gray-300 shadow-sm transition-colors no-underline mb-3">⬅ Back to Events</a>
         </div>
 

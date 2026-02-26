@@ -21,13 +21,12 @@
             header('Location: /events/index');
             exit();
         } else {
-            // ถ้าพลาด ค่อย renderView หน้าเดิมพร้อมส่ง Error
-            renderView('login', [
-                'title' => 'Login',
-                'old_email' => $email // ส่งอีเมลกลับไปให้ User ไม่ต้องพิมพ์ใหม่
-            ]);
-            $_SESSION['error'] = 'Invalid email or password'; // เก็บข้อความผิดพลาดใน Session
+            $_SESSION['error'] = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'; // 1. ตั้งค่า Error ก่อน
+
+            // 2. ส่งกลับไปหน้า Login (Redirect)
+            header('Location: /users/login');
+            exit();
         }
-    }else{
+    } else {
         notFound();
     }

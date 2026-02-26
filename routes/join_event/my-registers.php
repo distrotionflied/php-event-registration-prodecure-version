@@ -2,20 +2,14 @@
 declare(strict_types=1);
 
 $method = $context['method'];
-
-if (empty($_SESSION['user_id'])) {
-    header('Location: /login');
-    exit;
-}
-
 $userId = (int)$_SESSION['user_id'];
 
 if ($method === 'GET') {
     try {
-        $events = getJoinedEventsByUserId($userId); 
+        $joinevents = getJoinedEventsByUserId($userId); 
         renderView('my-register', [
             'title' => 'My Registered Events',
-            'events' => $events
+            'joinEvents' => $joinevents
         ]);
 
     } catch (Exception $e) {

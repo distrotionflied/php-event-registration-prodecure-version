@@ -7,6 +7,7 @@ function getAllEvents()
                 e.event_description AS description,
                 e.event_start,
                 e.event_end,
+                e.user_id AS creator_id,
                 u.name AS creator_name
             FROM events e
             JOIN users u ON e.user_id = u.user_id
@@ -62,6 +63,17 @@ function createEvent(
                     user_id
             ) VALUES (?, ?, ?, ?, ?)";
     $stmt = $connection->prepare($sql);
+    if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+
+    if($event_start > $event_end) {
+        throw new Exception("Event start time must be before end time");
+    }
+    /*
+    if($event_start < date('Y-m-d H:i:s')) {
+        throw new Exception("Event start time must be in the future");
+    }*/
     $stmt->bind_param(
         "ssssi",
         $name,
@@ -86,6 +98,7 @@ function getEventByKeyword($keyword)
                    e.event_description AS description,
                    e.event_start,
                    e.event_end,
+                   e.user_id AS creator_id,
                    u.name AS creator_name
             FROM events e
             JOIN users u ON e.user_id = u.user_id

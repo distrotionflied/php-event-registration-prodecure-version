@@ -10,9 +10,9 @@ if (empty($_SESSION['user_id'])) {
 }
 
 try {
-    $success = updateJoinStatus($joinEventId, JoinStatus::CANCELLED->value);
+    $success = updateJoinStatus($joinEventId, JoinStatus::REJECTED->value);
 
-    if ($success) {
+    if ($success && $checkin['checkin_status']) {
         header("Location: /events/$eventId/participants");
         exit;
     } else {

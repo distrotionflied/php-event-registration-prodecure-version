@@ -99,9 +99,10 @@ function dispatch(string $uri, string $method): void
 
     if($uri === ' '){$currentRoutePath = '';}
 
-    // 🔐 Auth Check
-    if (!isPublicRoute($currentRoutePath) && !isset($_SESSION['user_id'])) {
-        header('Location: /events');
+    // 🔐 Auth Check ทุกคนวิ่งผ่านที่นี้ เราไม่ต้อง require Auth
+        
+    if (!isPublicRoute($currentRoutePath) && empty($_SESSION['user_id'])) {
+        header('Location: /users/login');
         exit;
     }
 

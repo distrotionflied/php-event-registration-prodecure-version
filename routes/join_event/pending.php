@@ -10,9 +10,10 @@ if (empty($_SESSION['user_id'])) {
 }
 
 try {
+    $checkin = getCheckInStatusByJoinEventId($joinEventId);
     $success = updateJoinStatus($joinEventId, JoinStatus::PENDING->value);
 
-    if ($success) {
+    if ($success && $checkin['checkin_status']) {
         header("Location: /events/$eventId/participants");
         exit;
     } else {

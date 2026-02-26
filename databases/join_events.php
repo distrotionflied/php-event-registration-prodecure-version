@@ -36,12 +36,10 @@ function leaveEvent(int $joinEventId)
     return $stmt->execute();
 }
 
-
-
 function updateCheckInEvent(int $joinEventId, bool $checkInStatus)
 {
     global $connection;
-    $sql = "UPDATE join_event SET checkin_status = ?, otp_expires_at = NULL WHERE join_event_id = ? AND join_status = 'approved'";
+    $sql = "UPDATE join_event SET checkin_status = ?, checkin_at = NOW() WHERE join_event_id = ? AND join_status = 'approved'";
     $stmt = $connection->prepare($sql);
     if (!$stmt) {
         throw new Exception($connection->error);
@@ -100,7 +98,7 @@ function getJoinedEventsByUserId($userId)
 function getJoinEventById($joinEventId)
 {
     global $connection;
-    $sql = "SELECT join_event_id, user_id, event_id, join_status, checkin_status, totp_secret, otp_created_at, otp_expires_at
+    $sql = "SELECT join_event_id, user_id, event_id, join_status, checkin_status, totp_secret
                     FROM join_event
                     WHERE join_event_id = ?";
     $stmt = $connection->prepare($sql);
@@ -140,7 +138,7 @@ function getAllJoinedStatusByUserId($userId)
 function getByUserAndEvent($userId, $eventId)
 {
     global $connection;
-    $sql = "SELECT join_event_id, user_id, event_id, join_status, checkin_status, joined_at
+    $sql = "SELECT join_event_id, user_id, event_id, join_status, checkin_status, checkin_at
                     FROM join_event
                     WHERE user_id = ? AND event_id = ?";
     $stmt = $connection->prepare($sql);
@@ -177,6 +175,7 @@ function getAlluserByEventID(int $eventId): array
     }
     return $joinedEvents;
 }
+
 function getJoinEventStatusByUserAndEvent($userId, $eventId)
 {
     global $connection;
@@ -192,6 +191,48 @@ function getJoinEventStatusByUserAndEvent($userId, $eventId)
     return $row['join_status'];
 }
 
+function getJoinEventIdByUserIdAndEventId(int $userId, int $eventId){
+    global $connection;
+    $sql = "SELECT join_event_id FROM join_event WHERE user_id = ? AND  event_id = ?";
+    $stmt = $connection->prepare($sql);
+    if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+    $stmt->bind_param("ii", $userId, $eventId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    if (!$row) return null;
+    return $row['join_event_id'];
+}
+
+function getCheckInStatusByJoinEventId($joinEventId)
+{
+    global $connection;
+
+    $sql = "SELECT checkin_status FROM join_event WHERE join_event_id = ?";
+    $stmt = $connection->prepare($sql);
+
+    if (!$stmt) {
+        return [
+            "success" => false,
+            "error" => $connection->error
+        ];
+    }
+
+    $stmt->bind_param("i", $joinEventId);
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    if (!$row) {
+        return null;
+    }
+    return [
+        "success" => true,
+        "checkin_status" => (bool)$row['checkin_status']
+    ];
+}
+
 function saveTotpSecret(int $joinEventId, string $secret)
 {
     global $connection;
@@ -201,18 +242,6 @@ function saveTotpSecret(int $joinEventId, string $secret)
         throw new Exception($connection->error);
     }
     $stmt->bind_param("si", $secret, $joinEventId);
-    return $stmt->execute();
-}
-
-function setOtpCreate(int $joinEventId, string $otp)
-{
-    global $connection;
-    $sql = "UPDATE join_event SET otp_created_at  = ? WHERE join_event_id = ?";
-    $stmt = $connection->prepare($sql);
-    if (!$stmt) {
-        throw new Exception($connection->error);
-    }
-    $stmt->bind_param("si", $otp, $joinEventId);
     return $stmt->execute();
 }
 
@@ -229,46 +258,4 @@ function getTotpSecret(int $joinEventId)
     $row = $stmt->get_result()->fetch_assoc();
     if (!$row) return null;
     return $row['totp_secret'];
-}
-
-function getOtpCreate(int $joinEventId)
-{
-    global $connection;
-    $sql = "SELECT otp_created_at  FROM join_event WHERE join_event_id = ?";
-    $stmt = $connection->prepare($sql);
-    if (!$stmt) {
-        throw new Exception($connection->error);
-    }
-    $stmt->bind_param("i", $joinEventId);
-    $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
-    if (!$row) return null;
-    return $row['otp_created_at'];
-}
-
-function setOtpExpire(int $joinEventId, int $expireTime)
-{
-    global $connection;
-    $sql = "UPDATE join_event SET otp_expires_at = ? WHERE join_event_id = ?";
-    $stmt = $connection->prepare($sql);
-    if (!$stmt) {
-        throw new Exception($connection->error);
-    }
-    $stmt->bind_param("si", $expireTime, $joinEventId);
-    return $stmt->execute();
-}
-
-function getOtpExpire(int $joinEventId)
-{
-    global $connection;
-    $sql = "SELECT otp_expires_at FROM join_event WHERE join_event_id = ?";
-    $stmt = $connection->prepare($sql);
-    if (!$stmt) {
-        throw new Exception($connection->error);
-    }
-    $stmt->bind_param("i", $joinEventId);
-    $stmt->execute();
-    $row = $stmt->get_result()->fetch_assoc();
-    if (!$row) return null;
-    return $row['otp_expires_at'];
 }

@@ -9,7 +9,7 @@ if (empty($_SESSION['user_id'])) {
 }
 
 try {
-    $success = updateJoinStatus($joinEventId, JoinStatus::CONFIRMED->value);
+    $success = updateJoinStatus($joinEventId, JoinStatus::APPROVED->value);
 
     if ($success) {
         header("Location: /events/$eventId/participants");

@@ -2,7 +2,7 @@
 require_once INCLUDES_DIR . '/env.php';
 
 function db_connect(): mysqli {
-    $required = ['DB_HOST','DB_PORT','DB_USERNAME','DB_PASSWORD','DB_DATABASE'];
+    $required = ['DB_HOST','DB_PORT','DB_USERNAME','DB_PASSWORD','DB_DATABASE','IMAGE_CLOUD_URL','CLOUDINARY_CLOUD_NAME'];
 
     foreach ($required as $key) {
         if (!isset($_ENV[$key])) {

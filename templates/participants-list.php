@@ -25,7 +25,7 @@
                     </td>
 
                     <td class="px-6 py-4 text-sm">
-                        <?php if (($user['checkin_status'] ?? '') === 'checked'): ?>
+                        <?php if ($user['checkin_status']): ?>
                             <span class="text-green-600 font-medium">✅ เช็คอินแล้ว</span>
                         <?php else: ?>
                             <span class="text-gray-400">ยังไม่เช็คอิน</span>
@@ -36,6 +36,7 @@
                         <div class="inline-block text-left">
                             <button
                                 onclick="toggleDropdown(event, <?= $user['join_event_id'] ?>)"
+                                <?= $user['checkin_status'] ? 'disabled' : '' ?>
                                 class="dropdown-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all border shadow-sm
                                 <?= $user['join_status'] === 'approved' ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100' : ($user['join_status'] === 'rejected' ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100' :
                                         'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-300') ?>">
@@ -72,10 +73,16 @@
                         </div>
                     </td>
                     <td>
-                        <a href="/events/<?= $user['join_event_id'] ?>/checkin"
-                            class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-colors no-underline">
-                            🔐 Check-in
-                        </a>
+                        <?php if ($user['join_status'] === 'approved' && !$user['checkin_status']): ?>
+                            <a href="/events/<?= $user['join_event_id'] ?>/checkin"
+                                class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-colors no-underline">
+                                🔐 Check-in
+                            </a>
+                        <?php elseif ($user['join_status'] === 'approved' && $user['checkin_status']): ?>
+                            <span class="text-gray-400 font-medium">เช็คอินแล้ว</span>
+                        <?php else: ?>
+                            <span class="text-gray-400">ไม่สามารถเช็คอินได้</span>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

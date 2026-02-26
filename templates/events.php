@@ -70,17 +70,34 @@
 
                         <div class="mt-6">
                             <?php
-                            // เช็กว่ามี array $joined_events และ event id นี้อยู่ใน array นั้นหรือไม่
-                            if (isset($joined_events) && in_array($event['id'], $joined_events)) :
-                            ?>
+                            // 1. เช็คก่อนเลยว่า Login หรือยัง
+                            $is_logged_in = isset($_SESSION['user_id']);
+                            $is_creator = $is_logged_in && ($event['creator_id'] == $_SESSION['user_id']);
+                            $is_joined = isset($joined_events) && in_array($event['id'], $joined_events);
+
+                            if (!$is_logged_in) : ?>
+                                <a href="/events/<?= $event['id'] ?>/detail"
+                                    class="block text-center bg-gray-400 text-white font-bold py-2.5 rounded-lg shadow-sm cursor-not-allowed select-none">
+                                    👤 Login to Join
+                                </a>
+
+                            <?php elseif ($is_joined) : ?>
                                 <span class="block text-center bg-gray-400 text-white font-bold py-2.5 rounded-lg shadow-sm cursor-not-allowed select-none">
                                     ✅ Joined
                                 </span>
+
+                            <?php elseif ($is_creator) : ?>
+                                <a href="/events/<?= $event['id'] ?>/detail"
+                                    class="block text-center bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors no-underline">
+                                    👑 View Details
+                                </a>
+
                             <?php else : ?>
                                 <a href="/join_event/<?= $event['id'] ?>/join"
                                     class="block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg shadow-sm transition-colors no-underline">
                                     🤝 Join Event
                                 </a>
+
                             <?php endif; ?>
                         </div>
                     </div>

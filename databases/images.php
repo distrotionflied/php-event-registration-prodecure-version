@@ -46,8 +46,8 @@ function deleteImagesByEventId($eventId)
 
 
 function uploadToCloudinary(string $imageTmpPath, string $uploadPreset): ?array {
-    $cloudName = 'dc2hlh7p9'; // ใส่ Cloud Name ของคุณตรงนี้เลย
-    $url = "https://api.cloudinary.com/v1_1/$cloudName/image/upload";
+    $cloudName = $_ENV['CLOUDINARY_CLOUD_NAME']; // ใส่ Cloud Name ของคุณตรงนี้เลย
+    $url = $_ENV['IMAGE_CLOUD_URL'] . "/$cloudName/image/upload";
 
     $ch = curl_init();
     $postData = [
@@ -80,7 +80,7 @@ function deleteFromCloudinary(string $publicId): bool {
     $apiKey = 'YOUR_API_KEY';       // <--- ต้องใส่ API Key
     $apiSecret = 'YOUR_API_SECRET'; // <--- ต้องใส่ API Secret
 
-    $url = "https://api.cloudinary.com/v1_1/$cloudName/image/destroy";
+    $url = $_ENV['IMAGE_CLOUD_URL'] . "/$cloudName/image/destroy";
     $timestamp = time();
 
     // 2. สร้าง Signature (ลายเซ็นดิจิทัลเพื่อยืนยันว่าเราเป็นเจ้าของบัญชี)

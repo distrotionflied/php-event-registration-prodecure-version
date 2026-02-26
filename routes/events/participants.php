@@ -14,9 +14,7 @@ if ($method === 'GET') {
         $event = getEventById($eventId); 
         if (!$event) { notFound(); }
 
-        if ($event['creator_id'] != $_SESSION['user_id']) {
-            die("คุณไม่มีสิทธิ์เข้าถึงข้อมูลส่วนนี้");
-        }
+        creatorcheck($event['creator_id'], '/events');
 
         $participants = getAlluserByEventID($eventId);
 

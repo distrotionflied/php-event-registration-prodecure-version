@@ -1,25 +1,27 @@
 <?php
+
 declare(strict_types=1);
 
 $method = $context['method'];
 $id     = $context['id'];
 
-// 1. เปลี่ยนจาก API_KEY เป็นชื่อ Upload Preset ที่คุณตั้งเป็น Unsigned ใน Cloudinary
-$cloudinaryPreset = 'project1'; 
+$cloudinaryPreset = 'project1';
+
+// ตรวจสอบว่าเป็นเจ้าของกิจกรรมจริงไหม
+creatorcheck($event['creator_id'], '/events');
 
 if ($method === 'GET') {
-    $event = getEventById($id); 
+    $event = getEventById($id);
     if (!$event) {
         notFound();
     }
     renderView('edit-event', ['title' => 'Edit Event', 'event' => $event]);
-
 } elseif ($method === 'POST') {
     $name        = $_POST['name']        ?? '';
     $description = $_POST['description'] ?? '';
     $event_start = $_POST['event_start'] ?? '';
     $event_end   = $_POST['event_end']   ?? '';
-    
+
     updateEvent($id, $name, $description, $event_start, $event_end);
 
     if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] === UPLOAD_ERR_OK) {
@@ -27,16 +29,16 @@ if ($method === 'GET') {
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
 
         if (in_array($ext, $allowed)) {
-            
+
             // --- ส่วนการลบรูปภาพเดิม ---
-            $oldImages = getFullImagesByEventId($id); 
+            $oldImages = getFullImagesByEventId($id);
 
             if (!empty($oldImages)) {
                 foreach ($oldImages as $img) {
                     // หมายเหตุ: การลบผ่าน API ของ Cloudinary แบบ Unsigned จะซับซ้อนกว่า ImgBB
                     // เบื้องต้นถ้ายังไม่ได้เขียนฟังก์ชัน delete จาก Cloudinary ให้คอมเมนต์ไว้ก่อนครับ
                     if (!empty($img['delete_hash'])) {
-                        // deleteFromCloudinary($img['delete_hash']); 
+                        deleteFromCloudinary($img['delete_hash']);
                     }
                 }
             }
@@ -53,7 +55,7 @@ if ($method === 'GET') {
             }
         }
     }
-    
+
     header("Location: /events/$id/detail");
     exit;
 } else {
