@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?php
 
 declare(strict_types=1);
@@ -25,3 +26,19 @@ renderView('event-detail', [
     'currentParticipants' => $currentParticipants,
     'pendingParticipants' => $pendingParticipants
 ]);
+=======
+<?php
+declare(strict_types=1);
+
+$id = $context['id'];
+$event = getEventById($id);
+$userId = null;
+if(isset($_SESSION['user_id'])) {
+    $userId = $_SESSION['user_id'];   
+}
+
+if (!$event) {
+    notFound();
+}
+renderView('event-detail', ['title' => 'Event Detail', 'event' => $event, 'userId' => $userId]);
+>>>>>>> c94fb1a7902d2d4277cf18985386ddcbaa4e221a

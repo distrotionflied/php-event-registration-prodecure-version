@@ -1,4 +1,8 @@
 RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
+<<<<<<< HEAD
 RewriteRule . index.php [L]
+=======
+RewriteRule . index.php [L]
+>>>>>>> c94fb1a7902d2d4277cf18985386ddcbaa4e221a
