@@ -72,6 +72,7 @@ function getApprovedButNotCheckedInJoinEventByEventId(int $eventId): array
     return $joinedEvents;
 }
 
+<<<<<<< HEAD
 
 function getAmountOfApprovedParticipantsByEventId(int $eventId): int
 {
@@ -152,6 +153,8 @@ function getAmountOfPendingParticipants(){
     return $data;
 }
 
+=======
+>>>>>>> 003a1b17be90afd36e252cd621471063a0a6e3a9
 function updateJoinStatus(int $joinEventId, string $status)
 {
     global $connection;

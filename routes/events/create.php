@@ -13,6 +13,7 @@ if ($method === 'GET') {
     $event_start = $_POST['event_start'] ?? '';
     $event_end   = $_POST['event_end']   ?? '';
     $creator_id  = $_SESSION['user_id'];
+<<<<<<< HEAD
     $max_participants = $_POST['max_participants'];
 
     if($max_participants < 1) {
@@ -24,6 +25,9 @@ if ($method === 'GET') {
         echo '<script>alert("กรุณากรอกจำนวนผู้เข้าร่วมเป็นตัวเลข"); window.location.href = "/events/create";</script>';
         exit;
     }
+=======
+    $max_participants = $_POST['max_participants'] ?? 1;
+>>>>>>> 003a1b17be90afd36e252cd621471063a0a6e3a9
 
     if(empty($name) || empty($description) || empty($event_start) || empty($event_end)) {
         echo '<script>alert("กรุณากรอกข้อมูลให้ครบถ้วน"); window.location.href = "/events/create";</script>';

@@ -1,7 +1,22 @@
 <?php include 'header.php'; ?>
+<<<<<<< HEAD
 
 <main class="flex-grow py-10 px-4 flex flex-col items-center bg-gray-100">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 w-full max-w-2xl overflow-hidden order-gray-100">
+=======
+<main class="flex-grow py-12 px-4 sm:px-8 flex flex-col items-center">
+    <div class="bg-white p-8 sm:p-10 rounded-xl shadow-lg w-full max-w-3xl border border-gray-100">
+        <?php 
+        $images = getImagesByEventId($event['id']); 
+        if (!empty($images)) : 
+        ?>
+            <div class="w-full mb-8 overflow-hidden rounded-xl shadow-md border border-gray-100">
+                <img src="<?= htmlspecialchars($images[0]) ?>" 
+                     alt="<?= htmlspecialchars($event['name']) ?>" 
+                     class="w-full h-auto max-h-[400px] object-cover">
+            </div>
+        <?php endif; ?> 
+>>>>>>> 003a1b17be90afd36e252cd621471063a0a6e3a9
 
         <?php $images = getImagesByEventId($event['id']); if (!empty($images)): ?>
         <img src="<?= htmlspecialchars($images[0]) ?>" alt="<?= htmlspecialchars($event['name']) ?>"
@@ -31,6 +46,7 @@
                     <span class="text-xs font-bold px-3 py-1 rounded-full <?= $badge ?>"><?= $label ?></span>
                 </div>
 
+<<<<<<< HEAD
                 <!-- Progress bar -->
                 <div class="px-4 pt-4 pb-3">
                     <div class="flex justify-between items-baseline mb-2">
@@ -51,6 +67,34 @@
                         <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm <?= $clr ?>"></span><span class="text-xs text-gray-400">ยืนยันแล้ว</span></div>
                         <?php if($pendingParticipants > 0): ?>
                         <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-amber-300"></span><span class="text-xs text-gray-400">รออนุมัติ</span></div>
+=======
+        <?php
+            if(isset($alert)) {
+            echo '<div class="bg-green-100 mb-6 border border-green-300 rounded-lg w-full">';
+            echo '<p class="text-md text-green-500 font-medium mt-4 mb-4 text-center">' . htmlspecialchars($alert) . '</p>';
+            echo '</div>';
+        }
+
+        ?>
+
+        <hr class="border-t border-gray-200 my-8">
+
+        <div class="flex flex-wrap items-center">
+            <?php 
+            if ($userId != NULL && $event != NULL) :
+                // 1. เช็คว่าเป็นเจ้าของไหม
+                $isCreator = ($userId == $event['creator_id']);
+                    if ($isCreator): ?>
+                        <a href="/events/<?= $event['id'] ?>/edit" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">✏ Edit</a>
+
+                        <a href="/events/<?= $event['id'] ?>/participants" class="inline-block bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">👥 Participants</a>
+
+                        <a href="/events/<?= $event['id'] ?>/statistics" class="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">📊 Statistics</a>
+
+                        <a href="/events/<?= $event['id'] ?>/delete-event"
+                            onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบกิจกรรมนี้? การกระทำนี้ไม่สามารถย้อนกลับได้');"
+                            class="inline-block bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm transition-colors no-underline mr-3 mb-3">🗑 Delete</a>
+>>>>>>> 003a1b17be90afd36e252cd621471063a0a6e3a9
                         <?php endif; ?>
                         <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-gray-200"></span><span class="text-xs text-gray-400">ว่าง</span></div>
                     </div>

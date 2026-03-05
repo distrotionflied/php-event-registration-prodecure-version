@@ -48,7 +48,11 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         <div class="mb-6">
+=======
+        <div>
+>>>>>>> 003a1b17be90afd36e252cd621471063a0a6e3a9
             <label class="block text-sm font-bold text-gray-700 mb-2">Max Participants</label>
             <input type="number" name="max_participants" min="1" required
                 class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50">
