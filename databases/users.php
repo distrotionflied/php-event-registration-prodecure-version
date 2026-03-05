@@ -56,11 +56,12 @@ function createUser(
         throw new Exception("DB prepare failed: " . $connection->error);
     }
     $genderValue = $gender->value; // เก็บใส่ตัวแปรก่อน
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT); // แฮชรหัสผ่านก่อน
     $stmt->bind_param(
         "ssssss",
         $name,
         $email,
-        password_hash($password, PASSWORD_DEFAULT),
+        $hashedPassword,
         $birthday,
         $phone,
         $genderValue

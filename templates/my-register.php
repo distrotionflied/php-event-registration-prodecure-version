@@ -94,17 +94,22 @@
                                             <span class="flex-1 text-center bg-gray-300 text-gray-500 font-semibold py-2.5 rounded-lg shadow-sm cursor-not-allowed text-sm">
                                                 ⏳ ยังไม่ถึงเวลา
                                             </span>
-                                        <?php elseif ($nowTimestamp > $endTimestamp): ?>
-                                            <span class="flex-1 text-center bg-gray-300 text-gray-500 font-semibold py-2.5 rounded-lg shadow-sm cursor-not-allowed text-sm">
-                                                ❌ หมดเวลา
-                                            </span>
                                         <?php else: ?>
                                             <a href="/events/<?= $joinEvent['event_id'] ?? '' ?>/generate-otp"
                                                 class="flex-1 text-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2.5 rounded-lg transition-colors shadow-sm no-underline text-sm">
                                                 แสดง OTP
                                             </a>
                                         <?php endif; ?>
+                                    <?php elseif($nowTimestamp <= $endTimestamp): ?>
+                                        <span class="flex-1 text-center bg-yellow-400 text-yellow-800 font-semibold py-2.5 rounded-lg shadow-sm cursor-not-allowed select-none text-sm">
+                                            ⏳ รอการอนุมัติ
+                                        </span>
+                                    <?php elseif ($nowTimestamp > $endTimestamp): ?>
+                                            <span class="flex-1 text-center bg-gray-300 text-gray-500 font-semibold py-2.5 rounded-lg shadow-sm cursor-not-allowed text-sm">
+                                                ❌ หมดเวลา
+                                            </span>
                                     <?php endif; ?>
+                                    
 
                                     <?php if ($nowTimestamp <= $endTimestamp): ?>
                                         <a href="/join_event/<?= $joinEvent['join_event_id'] ?? '' ?>/leave"

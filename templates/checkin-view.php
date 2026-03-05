@@ -11,12 +11,9 @@
             <p class="mt-2 text-center text-sm text-gray-500">
                 กรุณากรอกรหัส OTP 6 หลักที่ผู้เข้าร่วมได้รับ
             </p>
-            <p class="text-center text-xs font-semibold text-blue-600 mt-1">
-                คุณกำลังเช็คอินให้: <?= htmlspecialchars($participant['participant_name'] ?? 'ผู้เข้าร่วม') ?>
-            </p>
         </div>
 
-        <form class="mt-8 space-y-6" action="/events/<?= $joinEventId ?>/verify-checkin" method="POST">
+        <form class="mt-8 space-y-6" action="/events/<?= $eventId ?>/verify-checkin" method="POST">
             <div class="rounded-md shadow-sm -space-y-px">
                 <div>
                     <label for="otp" class="sr-only">รหัส OTP</label>

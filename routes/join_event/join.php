@@ -19,9 +19,13 @@ if ($method === 'GET' || $method === 'POST') {
 
     try {
         $success = joinEvent($userId, $eventId);
-
         if ($success) {
-            header('Location: /events/' . $eventId . '/detail');
+            renderView('event-detail', [
+                'event' => $event,
+                'userId' => $userId,
+                'alert' => 'You have successfully joined the event!'
+            ]);
+            exit;
         } else {
             die("เกิดข้อผิดพลาดในการเข้าร่วมกิจกรรม");
         }   

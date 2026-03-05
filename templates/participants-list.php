@@ -8,7 +8,6 @@
                 <th class="px-6 py-4 text-sm font-semibold text-gray-700">สถานะการลงทะเบียน</th>
                 <th class="px-6 py-4 text-sm font-semibold text-gray-700">การเช็คอิน</th>
                 <th class="px-6 py-4 text-sm font-semibold text-gray-700 text-center">จัดการ</th>
-                <th class="px-6 py-4 text-sm font-semibold text-gray-700 text-center">ตรวจสอบ</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-gray-100">
@@ -72,44 +71,47 @@
                             </div>
                         </div>
                     </td>
-                    <td>
-                        <?php if ($user['join_status'] === 'approved' && !$user['checkin_status']): ?>
-                            <a href="/events/<?= $user['join_event_id'] ?>/checkin"
-                                class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg text-xs transition-colors no-underline">
-                                🔐 Check-in
-                            </a>
-                        <?php elseif ($user['join_status'] === 'approved' && $user['checkin_status']): ?>
-                            <span class="text-gray-400 font-medium">เช็คอินแล้ว</span>
-                        <?php else: ?>
-                            <span class="text-gray-400">ไม่สามารถเช็คอินได้</span>
-                        <?php endif; ?>
-                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 </div>
+
+<?php
+$hasApprovedNotCheckedIn = false;
+foreach ($participants as $user) {
+    if ($user['join_status'] === 'approved' && !$user['checkin_status']) {
+        $hasApprovedNotCheckedIn = true;
+        break;
+    }
+}
+?>
+<?php if ($hasApprovedNotCheckedIn): ?>
+    <div class="mt-4 flex justify-center">
+        <a href="/events/<?= $eventId ?>/checkin"
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl text-sm transition-colors no-underline shadow-sm">
+            🔐 Check-in ผู้เข้าร่วม
+        </a>
+    </div>
+<?php endif; ?>
+
 <?php include 'footer.php'; ?>
 
 <script>
     function toggleDropdown(event, id) {
-        // ป้องกันไม่ให้ event ไหลไปถึง window.onclick ทันที
         event.stopPropagation();
 
         const dropdown = document.getElementById('dropdown-' + id);
 
-        // ปิด dropdown ตัวอื่นทั้งหมดก่อน
         document.querySelectorAll('.dropdown-menu').forEach(el => {
             if (el.id !== 'dropdown-' + id) {
                 el.classList.add('hidden');
-                el.closest('tr').classList.remove('z-30'); // คืนค่า z-index แถวอื่น
+                el.closest('tr').classList.remove('z-30');
             }
         });
 
-        // สลับสถานะตัวปัจจุบัน
         const isHidden = dropdown.classList.toggle('hidden');
 
-        // ถ้าเปิดอยู่ ให้ยกแถวนี้ให้สูงกว่าเพื่อนเป็นพิเศษ
         if (!isHidden) {
             dropdown.closest('tr').classList.add('z-30');
         } else {
@@ -117,7 +119,6 @@
         }
     }
 
-    // คลิกที่ไหนก็ได้เพื่อปิด (ยกเว้นในเมนู)
     window.onclick = function(event) {
         if (!event.target.closest('.dropdown-menu')) {
             document.querySelectorAll('.dropdown-menu').forEach(el => {

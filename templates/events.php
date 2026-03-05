@@ -62,9 +62,22 @@
                                 <br>
                                 🏁 <?= htmlspecialchars($event['event_end']) ?>
 
-                                <div class="mt-4 pt-3 border-t border-gray-100 text-xs text-gray-500 font-normal">
-                                    👤 Created by: <?= htmlspecialchars($event['creator_name']) ?>
-                                </div>
+                                <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+    <span class="text-xs text-gray-500">
+        👤 <?= htmlspecialchars($event['creator_name']) ?>
+    </span>
+
+    <?php 
+        $max = $event['max_participants'] ?? 0;
+        $id = $event['id'];
+        $current = $current_participants[$id] ?? 0; // ดึงยอดตาม ID งาน
+        $isFull = ($max > 0 && $current >= $max);
+    ?>
+    <span class="text-xs font-bold <?= $isFull ? 'text-red-500' : 'text-blue-600' ?>">
+        👥 <?= number_format($current) ?> / <?= number_format($max) ?> คน
+        <?= $isFull ? '(เต็ม)' : '' ?>
+    </span>
+</div>
                             </small>
                         </div>
 

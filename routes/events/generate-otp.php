@@ -51,7 +51,7 @@ if (empty($participant['totp_secret'])) {
 }
 
 // ---------- สร้าง OTP (คำนวณจาก secret + เวลา) ----------
-$secret = getTotpSecret($joinEventId); 
+$secret = $participant['totp_secret'] ?? '';
 if (empty($secret)) {
     // กรณีแปลก ๆ
     renderView('otp-viewer', [

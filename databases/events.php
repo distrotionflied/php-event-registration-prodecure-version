@@ -8,7 +8,8 @@ function getAllEvents()
                 e.event_start,
                 e.event_end,
                 e.user_id AS creator_id,
-                u.name AS creator_name
+                u.name AS creator_name,
+                e.max_participants
             FROM events e
             JOIN users u ON e.user_id = u.user_id
             ORDER BY e.event_start DESC";
@@ -17,7 +18,6 @@ function getAllEvents()
         throw new Exception($connection->error);
     }
     $events = [];
-
     while ($row = $result->fetch_assoc()) {
         $events[] = $row;
     }
@@ -34,7 +34,8 @@ function getEventById($eventId)
                    e.event_start,
                    e.event_end,
                    u.name AS creator_name,
-                   u.user_id AS creator_id
+                   u.user_id AS creator_id,
+                   e.max_participants
             FROM events e
             JOIN users u ON e.user_id = u.user_id
             WHERE e.event_id = ?";
@@ -46,12 +47,35 @@ function getEventById($eventId)
     return $row;
 }
 
+function getEventByJoinEventId($JoinEventId)
+{
+    global $connection;
+    $sql = "SELECT e.event_id,
+                   e.event_name AS name,
+                   e.event_description,
+                   e.event_start,
+                   e.event_end,
+                   je.join_event_id,
+                   e.user_id AS creator_id
+            FROM events e
+            JOIN join_event je ON e.event_id = je.event_id
+            JOIN users u ON e.user_id = u.user_id
+            WHERE je.join_event_id = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("i", $JoinEventId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    if (!$row) return null;
+    return $row;
+}
+
 function createEvent(
     string $name,
     string $description,
     string $event_start,
     string $event_end,
-    int $creator_id
+    int $creator_id,
+    int $max_participants
 ): int { 
     global $connection;
     $sql = "INSERT INTO events 
@@ -60,8 +84,9 @@ function createEvent(
                     event_description, 
                     event_start, 
                     event_end, 
-                    user_id
-            ) VALUES (?, ?, ?, ?, ?)";
+                    user_id,
+                    max_participants
+            ) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $connection->prepare($sql);
     if (!$stmt) {
         throw new Exception($connection->error);
@@ -75,12 +100,13 @@ function createEvent(
         throw new Exception("Event start time must be in the future");
     }*/
     $stmt->bind_param(
-        "ssssi",
+        "ssssii",
         $name,
         $description,
         $event_start,
         $event_end,
-        $creator_id
+        $creator_id,
+        $max_participants
     );
     if ($stmt->execute()) {
         return (int)$connection->insert_id; 
@@ -126,7 +152,8 @@ function updateEvent(
     ?string $name = null,
     ?string $description = null,
     ?string $event_start = null,
-    ?string $event_end = null
+    ?string $event_end = null,
+    ?int $max_participants = null
 ): bool {
     global $connection;
     $fields = [];
@@ -153,6 +180,11 @@ function updateEvent(
         $params[] = $event_end;
         $types .= "s";
     }
+    if ($max_participants !== null) {
+        $fields[] = "max_participants = ?";
+        $params[] = $max_participants;
+        $types .= "i";
+    }
     if (empty($fields)) return false; // ไม่มีอะไรให้อัปเดต
     $types .= "i"; // สำหรับ eventId
     $params[] = $eventId;
@@ -169,6 +201,21 @@ function updateEvent(
     }
 
     return $stmt->affected_rows > 0;
+}
+
+function getMaxparticipants(int $eventId): int
+{
+    global $connection;
+    $sql = "SELECT max_participants FROM events WHERE event_id = ?";
+    $stmt = $connection->prepare($sql);
+     if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+    $stmt->bind_param("i", $eventId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    if (!$row) return 0;
+    return (int)$row['max_participants'];
 }
 
 function deleteEvent(int $eventId): bool
@@ -246,3 +293,4 @@ function getEventStatistics(int $eventId): array {
     $stmt->execute();
     return $stmt->get_result()->fetch_assoc();
 }
+

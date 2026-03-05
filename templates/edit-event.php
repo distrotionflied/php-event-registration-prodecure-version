@@ -65,6 +65,17 @@
             </div>
         </div>
 
+        <div class="mb-6">
+            <label class="text-sm font-semibold text-gray-700">Max Participants:</label>
+            <input type="number" name="max_participants" min="1" required
+                value="<?= htmlspecialchars($event['max_participants'] ?? '') ?>"
+                class="w-full mt-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all bg-gray-50">
+        </div>
+        <?php if (isset($error)): ?>
+            <div class="bg-red-100 mt-2 mb-2 border border-red-300 rounded-lg w-full">
+                <p class="text-md text-red-500 font-medium mt-4 mb-4 text-center"><?= htmlspecialchars($error) ?></p>
+            </div>
+        <?php endif; ?>
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors shadow-sm text-lg">Update Event</button>
     </form>
 

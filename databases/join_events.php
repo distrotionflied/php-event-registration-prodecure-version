@@ -49,6 +49,109 @@ function updateCheckInEvent(int $joinEventId, bool $checkInStatus)
     return $stmt->execute();
 }
 
+function getApprovedButNotCheckedInJoinEventByEventId(int $eventId): array
+{
+    global $connection;
+    $sql = "SELECT je.join_event_id, 
+                   je.user_id, 
+                   je.totp_secret,
+                   e.user_id AS event_creator_id
+            FROM join_event je 
+            JOIN events e ON je.event_id = e.event_id
+            WHERE je.event_id = ? AND je.join_status = 'approved' AND je.checkin_status = 0";
+
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("i", $eventId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $joinedEvents = [];
+    while ($row = $result->fetch_assoc()) {
+        $joinedEvents[] = $row;
+    }
+    return $joinedEvents;
+}
+
+
+function getAmountOfApprovedParticipantsByEventId(int $eventId): int
+{
+    global $connection;
+    $sql = "SELECT COUNT(*) AS participant_count FROM join_event WHERE event_id = ? AND join_status = 'approved'";
+    $stmt = $connection->prepare($sql);
+    if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+    $stmt->bind_param("i", $eventId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    if (!$row) return 0;
+    return (int)$row['participant_count'];
+}
+
+function getAmountOfPendingParticipantsByEventId(int $eventId): int
+{
+    global $connection;
+    $sql = "SELECT COUNT(*) AS participant_count FROM join_event WHERE event_id = ? AND join_status = 'pending'";
+    $stmt = $connection->prepare($sql);
+    if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+    $stmt->bind_param("i", $eventId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    if (!$row) return 0;
+    return (int)$row['participant_count'];
+}
+
+function getAllAmountOfApprovedParticipants(): array // เปลี่ยนเป็นคืนค่า array
+{
+    global $connection;
+    $sql = "SELECT event_id, COUNT(*) AS participant_count 
+            FROM join_event 
+            WHERE join_status = 'approved' 
+            GROUP BY event_id";
+    
+    $stmt = $connection->prepare($sql);
+    if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        // เก็บข้อมูลในรูปแบบ [event_id => จำนวนคน]
+        $data[$row['event_id']] = (int)$row['participant_count'];
+    }
+    
+    return $data;
+}
+
+function getAmountOfPendingParticipants(){
+    global $connection;
+    $sql = "SELECT event_id, COUNT(*) AS participant_count 
+            FROM join_event 
+            WHERE join_status = 'pending' 
+            GROUP BY event_id";
+    
+    $stmt = $connection->prepare($sql);
+    if (!$stmt) {
+        throw new Exception($connection->error);
+    }
+    
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        // เก็บข้อมูลในรูปแบบ [event_id => จำนวนคน]
+        $data[$row['event_id']] = (int)$row['participant_count'];
+    }
+    
+    return $data;
+}
+
 function updateJoinStatus(int $joinEventId, string $status)
 {
     global $connection;
@@ -98,8 +201,8 @@ function getJoinedEventsByUserId($userId)
 function getJoinEventById($joinEventId)
 {
     global $connection;
-    $sql = "SELECT join_event_id, user_id, event_id, join_status, checkin_status, totp_secret
-                    FROM join_event
+    $sql = "SELECT je.join_event_id, je.user_id, je.event_id, je.join_status, je.checkin_status, je.totp_secret, e.user_id AS event_creator_id
+                    FROM join_event je JOIN events e ON je.event_id = e.event_id
                     WHERE join_event_id = ?";
     $stmt = $connection->prepare($sql);
     if (!$stmt) {
@@ -225,8 +328,13 @@ function getCheckInStatusByJoinEventId($joinEventId)
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     if (!$row) {
-        return null;
+        $stmt->close();
+        return [
+            "success" => false,
+            "checkin_status" => false
+        ];
     }
+    $stmt->close();
     return [
         "success" => true,
         "checkin_status" => (bool)$row['checkin_status']
@@ -256,6 +364,7 @@ function getTotpSecret(int $joinEventId)
     $stmt->bind_param("i", $joinEventId);
     $stmt->execute();
     $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     if (!$row) return null;
     return $row['totp_secret'];
 }

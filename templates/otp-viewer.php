@@ -58,13 +58,16 @@
         // Polling (ตรวจสอบสถานะเช็คอินอัตโนมัติ)
         const join_event_id = <?= (int)$participant['join_event_id'] ?>;
         setInterval(() => {
-            fetch(`/events/client-verify-checkin?join_event_id=${join_event_id}`)
-            .then(res => res.json())
-            .then(data => {
-                if(data.status === "FOUND"){
-                    window.location.href = `/events/<?= $eventId ?>/detail?success=1`;
-                }
-            });
-        }, 3000);
+    fetch(`/events/client-verify-checkin?join_event_id=${join_event_id}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === "FOUND"){
+            window.location.href = `/events/<?= $eventId ?>/detail?success=1`;
+        }
+    })
+    .catch(err => {
+        console.error("Polling error:", err);
+    });
+}, 3000);
     });
 </script>

@@ -46,7 +46,7 @@
                         <?= htmlspecialchars($_SESSION['error']) ?>
                     </span>
                     <?php unset($_SESSION['error']); 
-                    ?>
+                ?>
                 <?php endif; ?>
             </div>
         </form>

@@ -38,11 +38,40 @@ if ($method === 'GET') {
     $description = $_POST['description'] ?? '';
     $event_start = $_POST['event_start'] ?? '';
     $event_end   = $_POST['event_end']   ?? '';
+    $max_participants = $_POST['max_participants'];
+
+    if($max_participants < 1) {
+        renderView('edit-event', [
+            'title' => 'Edit Event', 
+            'event' => $event,
+            'error' => 'Maximum participants must be greater than 0.'
+        ]);
+        exit;
+    }
+
+    if(is_numeric($max_participants) == false) {
+        renderView('edit-event', [
+            'title' => 'Edit Event', 
+            'event' => $event,
+            'error' => 'Maximum participants must be a number.'
+        ]);
+        exit;
+    }
 
     // อัปเดตข้อมูลข้อความในฐานข้อมูล
-    updateEvent($id, $name, $description, $event_start, $event_end);
+    updateEvent($id, $name, $description, $event_start, $event_end, (int)$max_participants);
 
     // --- ส่วนจัดการรูปภาพ (Cloudinary) ---
+    if($event_start > $event_end) {
+        // ถ้าเวลาเริ่มมากกว่าเวลาสิ้นสุด ให้แสดงข้อผิดพลาด
+        renderView('edit-event', [
+            'title' => 'Edit Event', 
+            'event' => $event,
+            'error' => 'Event start time must be before end time.'
+        ]);
+        exit;
+    }
+
     if (isset($_FILES['event_image']) && $_FILES['event_image']['error'] === UPLOAD_ERR_OK) {
         $ext = strtolower(pathinfo($_FILES['event_image']['name'], PATHINFO_EXTENSION));
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
